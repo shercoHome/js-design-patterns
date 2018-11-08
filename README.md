@@ -143,3 +143,19 @@ Object.create = Object.create || function( obj){
 JavaScript本身是一门基于原型的面向对象语言，
 它的对象系统就是使用原型模式来搭建的，在这
 里称之为原型编程范型也许更合适。
+
+#### 原型编程范型的一些规则
+* 所有的数据都是对象。 
+JavaScript在设计的时候，模仿Java引入了两套类型机制：基本类型和对象类型。 
+基本类型包括undefined、number、boolean、string、function 
+    JavaScript中的根对象是Object.prototype对象 
+可以利用ECMAScript 5提供的
+Object.getPrototypeOf来查看这两个对象
+的原型：
+```javascript
+console.log( Object.getPrototypeOf( obj1 ) ===Object.prototype ); // 输出：true
+console.log( Object.getPrototypeOf( obj2 ) ===Object.prototype ); // 输出：true
+```
+* 要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。
+* 对象会记住它的原型。
+* 如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。
