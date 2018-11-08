@@ -5,7 +5,7 @@
 
 ### js是动态类型语言 & 鸭子类型（只要function/action对）
 
-```
+```javascipt
 //会嘎嘎叫，就可以加入合唱团，不管是什么类型
 var duck = {
     duckSinging: function(){
@@ -35,7 +35,7 @@ joinChoir( chicken ); // 恭喜加入合唱团
 
 同一操作作用于不同的对象上面，可以产生不同的解释和不同的执行结果。
 
-```
+```javascipt
 var makeSound = function( animal ){
     if ( animal instanceof Duck ){
         console.log( '嘎嘎嘎' );
@@ -57,13 +57,13 @@ makeSound( new Chicken() ); // 咯咯咯
 多态最根本的作用就是通过把过程化的条件分支语句转化为对象的多态性，从而消除这些条件分支语句
 
 #### 多态之隔离固定
-```
+```javascipt
 var makeSound = function( animal ){
     animal.sound();
 };
 ```
 #### 多态之封装变化
-```
+```javascipt
 var Duck = function(){}
 Duck.prototype.sound = function(){
 console.log( '嘎嘎嘎' );
@@ -76,7 +76,7 @@ console.log( '咯咯咯' );
 #### 多态之外部调用
 正是由于js的动态类型，不检查创建类型、参数类型
 animal即可以是duck，也可以是chicken，只要有固定的方法sound，即可调用成功
-```
+```javascipt
 makeSound( new Duck() ); // 嘎嘎嘎
 makeSound( new Chicken() ); // 咯咯咯
 ```
@@ -90,7 +90,7 @@ makeSound( new Chicken() ); // 咯咯咯
 
 通过函数来创建作用域(ECMAScript 6中提供let)
 
-```
+```javascipt
 var myObject = (function(){
 
     var __name = 'sven'; // 私有（private）变量
@@ -113,11 +113,13 @@ console.log( myObject.__name ) // 输出：undefined
 是静态类型语言中一种重要的封装方式，JavaScript由于动态类型、模糊类型的特性，没有能力，也没有必要做
 #### 封装变化
 >找到变化并封装之
->       ——《设计模式》
-通过封装变化的方式，把系统中稳定不变的部分
+       ——《设计模式》
+
+    通过封装变化的方式，把系统中稳定不变的部分
 和容易变化的部分隔离开来，在系统的演变过程
 中，我们只需要替换那些容易变化的部分，如果
 这些部分是已经封装好的，替换起来也相对容
 易。这可以最大程度地保证程序的稳定性和可扩
 展性。
-`主要目的是提高可复用性`
+
+    `主要目的是提高可复用性`
