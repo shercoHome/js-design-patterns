@@ -5,7 +5,7 @@
 
 ### js是动态类型语言 & 鸭子类型（只要function/action对）
 
-```javascipt
+```javascript
 //会嘎嘎叫，就可以加入合唱团，不管是什么类型
 var duck = {
     duckSinging: function(){
@@ -35,7 +35,7 @@ joinChoir( chicken ); // 恭喜加入合唱团
 
 同一操作作用于不同的对象上面，可以产生不同的解释和不同的执行结果。
 
-```javascipt
+```javascript
 var makeSound = function( animal ){
     if ( animal instanceof Duck ){
         console.log( '嘎嘎嘎' );
@@ -57,13 +57,13 @@ makeSound( new Chicken() ); // 咯咯咯
 多态最根本的作用就是通过把过程化的条件分支语句转化为对象的多态性，从而消除这些条件分支语句
 
 #### 多态之隔离固定
-```javascipt
+```javascript
 var makeSound = function( animal ){
     animal.sound();
 };
 ```
 #### 多态之封装变化
-```javascipt
+```javascript
 var Duck = function(){}
 Duck.prototype.sound = function(){
 console.log( '嘎嘎嘎' );
@@ -76,7 +76,7 @@ console.log( '咯咯咯' );
 #### 多态之外部调用
 正是由于js的动态类型，不检查创建类型、参数类型
 animal即可以是duck，也可以是chicken，只要有固定的方法sound，即可调用成功
-```javascipt
+```javascript
 makeSound( new Duck() ); // 嘎嘎嘎
 makeSound( new Chicken() ); // 咯咯咯
 ```
@@ -90,7 +90,7 @@ makeSound( new Chicken() ); // 咯咯咯
 
 通过函数来创建作用域(ECMAScript 6中提供let)
 
-```javascipt
+```javascript
 var myObject = (function(){
 
     var __name = 'sven'; // 私有（private）变量
@@ -120,3 +120,28 @@ console.log( myObject.__name ) // 输出：undefined
     最大程度地保证程序的稳定性和可扩展性。
 
     `主要目的是提高可复用性`
+
+### 原型模式和基于原型继承的JavaScript对象系统
+####  使用克隆的原型模式
+```javascript
+var clonePlane = Object.create( plane );
+//在不支持Object.create方法的浏览器中，则可以使用以下代码：
+Object.create = Object.create || function( obj){
+    var F = function(){};
+    F.prototype = obj;
+    return new F();
+}
+```
+#### 克隆是创建对象的手段
+原型模式提供了另外一种创建对象的方式，通过
+克隆对象，我们就不用再关心对象的具体类型名
+字。这就像一个仙女要送给三岁小女孩生日礼
+物，虽然小女孩可能还不知道飞机或者船怎么
+说，但她可以指着商店橱柜里的飞机模型说“我
+要这个”。
+当然在JavaScript这种类型模糊的语言中，创建对
+象非常容易，也不存在类型耦合的问题。从设计
+模式的角度来讲，原型模式的意义并不算大 。但
+JavaScript本身是一门基于原型的面向对象语言，
+它的对象系统就是使用原型模式来搭建的，在这
+里称之为原型编程范型也许更合适。
