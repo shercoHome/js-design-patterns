@@ -584,4 +584,136 @@ Type.isString("str"); // 输出：true
 
     ```
 2. 延续局部变量的寿命
+    以下report函数并不是每一次都成功发起了HTTP请求。
+    ```javascript
+    var report = function( src ){
+        var img = new Image();
+        img.src = src;
+    };
+    report( 'http://baidu.com/getUserInfo' );
+    ```
+    丢失数据的原因是img是report函数中的局部变量，当report函数的调用结束后，img局部变量随即被销毁，而此时或许还没来得及发出HTTP请求，所以此次请求就会丢失掉。在不使用全局变量的情况下，用闭包保存变量：
+    ```javascript
+    var report = (function(){
+        var imgs = [];
+        return function( src ){
+            var img = new Image();
+            imgs.push( img );
+            img.src = src;
+        }
+    })();
+    ```
+#### 3.1.4 闭包和面向对象设计
+1. 闭包写法  
+    ```javascript
+    var extent = function(){
+        var value = 0;
+        return {
+            call: function(){
+                value++;
+                console.log( value );
+            }
+        }
+    };
+    var extent = extent();
+    extent.call(); // 输出：1
+    extent.call(); // 输出：2
+    extent.call(); // 输出：3
+    ```
+2. 面向对象——字面量
+    ```javascript
+    var extent = {
+        value: 0,
+        call: function(){
+            this.value++;
+            console.log( this.value );
+        }
+    };
+    extent.call(); // 输出：1
+    extent.call(); // 输出：2
+    extent.call(); // 输出：3
 
+    ```
+3. 面向对象——构造函数
+    ```javascript
+    var Extent = function(){
+        this.value = 0;
+    };
+    Extent.prototype.call = function(){
+        this.value++;
+        console.log( this.value );
+    };
+    var extent = new Extent();
+    extent.call(); // 输出：1
+    extent.call(); // 输出：2
+    extent.call(); // 输出：3
+    ```
+#### 3.1.5 用闭包实现命令模式
+命令模式的意图是把请求封装为对象，从而分离请求的发起者和请求的接收者（执行者）之间的耦合关系。在命令被执行之前，可以预先往命令对象中植入命令的接收者。但在JavaScript中，函数作为一等对象，本身就可以四处传递，用函数对象而不是普通对象来封装请求显得更加简单和自然。如果需要往函数对象中预先植入命令的接收者，那么闭包可以完成这个工作。在面向对象版本的命令模式中，预先植入的命令接收者被当成对象的属性保存起来；而在闭包版本的命令模式中，命令接收者会被封闭在闭包形成的环境中，代码如下：
+```javascript
+var Tv = {
+    open: function () {
+        console.log('打开电视机');
+    },
+    close: function () {
+        console.log('关上电视机');
+    }
+};
+//////////////// 面向对象的方式 ////////////////////////////
+var OpenTvCommand = function (receiver) {                //
+    this.receiver = receiver;                            //
+};                                                       //
+OpenTvCommand.prototype.execute = function () {          //
+    this.receiver.open(); // 执行命令，打开电视机          //
+};                                                       //
+OpenTvCommand.prototype.undo = function () {             //
+    this.receiver.close(); // 撤销命令，关闭电视机         //
+};                                                       //
+/////////////////// 闭包的方式 /////////////////////////////
+var createCommand = function (receiver) {                //
+    var execute = function () {                          //
+        return receiver.open(); // 执行命令，打开电视机    //
+    }                                                    //
+    var undo = function () {                             //
+        return receiver.close(); // 执行命令，关闭电视机   //
+    }                                                    //
+    return {                                             //
+        execute: execute,                                //
+        undo: undo                                       //
+    }                                                    //
+};                                                       //
+///////////////////////////////////////////////////////////
+
+var setCommand = function (command) {
+    document.getElementById('execute').onclick = function () {
+        command.execute(); // 输出：打开电视机
+    }
+    document.getElementById('undo').onclick = function () {
+        command.undo(); // 输出：关闭电视机
+    }
+};
+setCommand(new OpenTvCommand(Tv));
+setCommand(createCommand(Tv));
+```
+
+#### 3.1.6 闭包与内存管理
+
+闭包是一个非常强大的特性，但人们对其也有诸多误解。一种耸人听闻的说法是闭包会造成内存泄露，所以要尽量减少闭包的使用。
+
+局部变量本来应该在函数退出的时候被解除引用，但如果局部变量被封闭在闭包形成的环境中，那么这个局部变量就能一直生存下去。从这个意义上看，闭包的确会使一些数据无法被及时销毁。
+
+使用闭包的一部分原因是我们选择主动把一些变量封闭在闭包中，因为可能在以后还需要使用这些变量，把这些变量放在闭包中和放在全局作用域，对内存方面的影响是一致的，这里并不能说成是内存泄露。
+
+`如果在将来需要回收这些变量，我们可以手动把这些变量设为null。`
+
+跟闭包和内存泄露有关系的地方是，使用闭包的同时比较容易形成`循环引用`，如果闭包的作用域链中保存着一些DOM节点，这时候就有可能造成`内存泄露`。
+
+`但这本身并非闭包的问题，也并非JavaScript的问题。`
+
+在IE浏览器中，由于BOM和DOM中的对象是使用C++以COM对象的方式实现的，而COM对象的垃圾收集机制采用的是引用计数策略。在基于引用计数策略的垃圾回收机制中，如果两个对象之间形成了循环引用，那么这两个对象都无法被回收，但`循环引用造成的内存泄露在本质上也不是闭包造成的`。同样，如果要解决循环引用带来的内存泄露问题，我们只需要把循环引用中的变量设为null即可。将变量设置为null意味着切断变量与它此前引用的值之间的连接。当垃圾收集器下次运行时，就会删除这些值并回收它们占用的内存。
+
+### 3.2 高阶函数
+高阶函数是指至少满足下列条件之一的函数。
+* 函数可以作为参数被传递；
+* 函数可以作为返回值输出。
+JavaScript语言中的函数显然满足高阶函数的条件，在实际开发中，无论是将函数当作参数传递，还是让函数的执行结果返回另外一个函数，这两种情形都有很多应用场景，下面就列举一些高阶函数的应用场景。
