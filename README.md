@@ -144,7 +144,13 @@ JavaScript本身是一门基于原型的面向对象语言，
 它的对象系统就是使用原型模式来搭建的，在这
 里称之为原型编程范型也许更合适。
 
-#### 1.4.3原型编程范型的一些规则
+#### 1.4.3 JavaScript中的原型继承（原型编程范型的一些规则）
+
+* 所有的数据都是对象。
+* 要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。
+* 对象会记住它的原型。
+* 如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。
+
     1. __所有的数据都是对象。__  
 JavaScript在设计的时候，模仿Java引入了两套类型机制：基本类型和对象类型。  
 基本类型包括undefined、number、boolean、string、function  
@@ -261,3 +267,99 @@ console.log( b.name ); // 输出：sven
 
 `给A.prototype的构造器原型Object.prototype，Object.prototype的原型是null，`
 
+#### 1.4.4 ECMAScript 6 实现的继承（实际也是通过原型继承）
+```javascript
+class Animal {
+    constructor(name) {
+        this.name = name;
+    }
+    getName() {
+        return this.name;
+    }
+}
+class Dog extends Animal {
+    constructor(name) {
+        super(name);//super关键字用于访问和调用一个对象的父对象上的函数。
+    }
+    speak() {
+        return "woof";
+    }
+}
+var dog = new Dog("Scamp");
+console.log(dog.getName() + ' says ' +dog.speak());
+```
+
+## 二、this call 和 apply
+
+### 2.1 this
+
+跟别的语言大相径庭的是，JavaScript的this总是指向一个对象，而具体指向哪个对象是在运行时基于函数的执行环境动态绑定的，而非函数被声明时的环境。
+
+#### 2.1.1 this的指向  
+除去不常用的with和eval的情况，具体到实际应用中，this的指向大致可以分为以下4种。
+* 作为对象的方法调用。指向该对象
+``` javascript
+var obj = {
+    a: 1,
+    getA: function(){
+        console.log ( this === obj ); // 输出：true
+        console.log ( this.a ); // 输出: 1
+    }
+};
+obj.getA();
+
+```
+* 作为普通函数调用。相当于是window的方法,指向window对象
+``` javascript
+window.name = 'globalName';
+var myObject = {
+    name: 'sven',
+    getName: function(){
+        console.log(  this.name ); 
+    }
+};
+myObject.getName();//sven
+
+var getName = myObject.getName;
+getName();//globalName
+//相当于 window.getName=myObject.getName;
+//相当于 window.getName();
+```
+* 构造器调用。
+    * 当用new运算符调用函数时，该函数总会返回一个对象，通常情况下，构造器里的this就指向返回的这个对象
+    ``` javascript
+    //构造器的外表跟普通函数一模一样，它们的区别在于被调用的方式
+    function MyClassHello(){
+        this.name2 = 'Hello';
+    };
+    var obj = new MyClassHello();
+    console.log ( MyClassHello.name ); // 输出：MyClassHello
+    console.log ( MyClassHello.name2 ); // 输出：undefined
+    console.log ( obj.name ); // 输出：undefined
+    console.log ( obj.name2 ); // 输出：Hello
+    ```
+    * 如果构造器显式地返回了一个object类型的对象，那么此次运算结果最终会返回这个对象
+    ``` javascript
+    var MyClass = function(){
+    this.name = 'sven';
+    return { // 显式地返回一个对象
+    name: 'anne'
+    }
+    };
+    var obj = new MyClass();
+    alert ( obj.name ); // 输出：anne
+    ```
+* Function.prototype.call或Function.prototype.apply调用，动态地改变传入函数的this：。
+    ```javascript
+        var obj1 = {
+            name: 'sven',
+            getName: function(){
+                return this.name;
+            }
+        };
+        var obj2 = {
+            name: 'anne'
+    };
+    console.log( obj1.getName() ); // 输出:sven
+    console.log( obj1.getName.call( obj2 ) );// 输出：anne
+    ```
