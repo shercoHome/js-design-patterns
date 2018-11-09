@@ -515,73 +515,73 @@ Type.isString("str"); // 输出：true
 ```
 #### 3.1.3 闭包的更多作用
 1. 封装变量  
-计算乘积
-```javascript
-var mult = function(){
-    var a = 1;
-    for ( var i = 0, l = arguments.length; i <l; i++ ){
-        a = a * arguments[i];
-    }
-    return a;
-};
-```
-计算乘积，并缓存结果
-```javascript
-var cache = {};
-var mult = function(){
-    var args = Array.prototype.join.call(arguments, ',' );//join 将数组拼接成字符串，以便缓存
-    if ( cache[ args ] ){ //有缓存结果
-        return cache[ args ];
-    }
-    var a = 1;
-    for ( var i = 0, l = arguments.length; i <l; i++ ){
-        a = a * arguments[i];
-    }
-    return cache[ args ] = a; //缓存结果
-};
-alert ( mult( 1,2,3 ) ); // 输出：6
-alert ( mult( 1,2,3 ) ); // 输出：6
-```
-计算乘积，并缓存结果，将cache缓存封闭进计算函数中，避免被修改
-```javascript
-var mult = (function(){
-    var cache = {};
-    return function(){
-        var args = Array.prototype.join.call(arguments, ',' );
-        if ( args in cache ){
-            return cache[ args ];
-        }
+    计算乘积
+    ```javascript
+    var mult = function(){
         var a = 1;
-        for ( var i = 0, l = arguments.length;i < l; i++ ){
+        for ( var i = 0, l = arguments.length; i <l; i++ ){
             a = a * arguments[i];
-        }
-        return cache[ args ] = a;
-    }
-})();
-```
-计算乘积，并缓存结果，将cache缓存封闭进计算函数中，避免被修改  
-封闭独立的代码块=>小函数  
-如果这些小函数不需要在程序的其他地方使用，最好是把它们用闭包封闭起来
-```javascript
-var mult = (function(){
-    var cache = {};
-    var calculate = function(){ // 封闭calculate函数
-        var a = 1;
-        for ( var i = 0, l = arguments.length;
-        i < l; i++ ){
-        a = a * arguments[i];
         }
         return a;
     };
-    return function(){
-        var args = Array.prototype.join.call(arguments, ',' );
-        if ( args in cache ){
+    ```
+    计算乘积，并缓存结果
+    ```javascript
+    var cache = {};
+    var mult = function(){
+        var args = Array.prototype.join.call(arguments, ',' );//join 将数组拼接成字符串，以便缓存
+        if ( cache[ args ] ){ //有缓存结果
             return cache[ args ];
         }
-        return cache[ args ] =calculate.apply( null, arguments );
-    }
-})();
+        var a = 1;
+        for ( var i = 0, l = arguments.length; i <l; i++ ){
+            a = a * arguments[i];
+        }
+        return cache[ args ] = a; //缓存结果
+    };
+    alert ( mult( 1,2,3 ) ); // 输出：6
+    alert ( mult( 1,2,3 ) ); // 输出：6
+    ```
+    计算乘积，并缓存结果，将cache缓存封闭进计算函数中，避免被修改
+    ```javascript
+    var mult = (function(){
+        var cache = {};
+        return function(){
+            var args = Array.prototype.join.call(arguments, ',' );
+            if ( args in cache ){
+                return cache[ args ];
+            }
+            var a = 1;
+            for ( var i = 0, l = arguments.length;i < l; i++ ){
+                a = a * arguments[i];
+            }
+            return cache[ args ] = a;
+        }
+    })();
+    ```
+    计算乘积，并缓存结果，将cache缓存封闭进计算函数中，避免被修改  
+    封闭独立的代码块=>小函数  
+    如果这些小函数不需要在程序的其他地方使用，最好是把它们用闭包封闭起来
+    ```javascript
+    var mult = (function(){
+        var cache = {};
+        var calculate = function(){ // 封闭calculate函数
+            var a = 1;
+            for ( var i = 0, l = arguments.length;
+            i < l; i++ ){
+            a = a * arguments[i];
+            }
+            return a;
+        };
+        return function(){
+            var args = Array.prototype.join.call(arguments, ',' );
+            if ( args in cache ){
+                return cache[ args ];
+            }
+            return cache[ args ] =calculate.apply( null, arguments );
+        }
+    })();
 
-```
+    ```
 2. 延续局部变量的寿命
 
