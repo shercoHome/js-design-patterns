@@ -762,42 +762,111 @@ JavaScript语言中的函数显然满足高阶函数的条件，在实际开发�
 #### 3.2.2 函数可以作为返回值输出
 函数当作返回值输出的应用场景也许更多，也更能体现函数式编程的巧妙。让函数继续返回一个可执行的函数，意味着运算过程是可延续的。
 1. 判断数据的类型
+    ```javascript
+    var isString = function( obj ){
+        return Object.prototype.toString.call( obj) === '[object String]';
+    };
+    var isArray = function( obj ){
+        return Object.prototype.toString.call( obj) === '[object Array]';
+    };
+    var isNumber = function( obj ){
+        return Object.prototype.toString.call( obj) ==='[object Number]';
+    };
+    ```
+    三个函数有相同（不变）的地方。可以用一个函数返回这三个函数
+    ```javascript
+    var isType = function( type ){
+        return function( obj ){
+            return Object.prototype.toString.call(obj ) === '[object '+ type +']';
+        }
+    };
+    var isString = isType( 'String' );
+    var isArray = isType( 'Array' );
+    var isNumber = isType( 'Number' );
+    console.log( isArray( [ 1, 2, 3 ] ) ); //输出：true
+
+    ```
+    再用一个循环，批量注册
+    ```javascript
+    var Type = {};
+    for ( var i = 0, type; type = [ 'String','Array', 'Number' ][ i++ ]; ){
+        (function( type ){
+            Type[ 'is' + type ] = function( obj ){
+                return Object.prototype.toString.call( obj ) ==='[object '+ type +']';
+            }
+        })( type )
+    };
+    Type.isArray( [] ); // 输出：true
+    Type.isString( "str" ); // 输出：true
+    ```
+2. getSingle
+    下面是一个单例模式的例子,也是一个高阶函数的例子，既把函数当作参数传递，又让函数执行后返回了另外一个函数。
+    ```javascript
+    var getSingle = function (fn) {
+        var ret;
+        return function () {
+            return ret || (ret = fn.apply(this,arguments));
+        };
+    };
+    var getScript = getSingle(function () {
+        return document.createElement('script');
+    });
+    var script1 = getScript();
+    var script2 = getScript();
+    console.log(script1 === script2); // 输出：true    
+    ////////////////  不使用闭包时，是不同的 //////////////////
+    var getScript2 = function () {
+        return document.createElement('script');
+    };
+    var script11 = getScript2();
+    var script22 = getScript2();
+    console.log(script11 === script22); // 输出：false 
+    ```
+#### 3.2.3 高阶函数实现AOP
+AOP（面向切面编程）的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些跟业务逻辑无关的功能通常包括日志统计、安全控制、异常处理等。
+把这些功能抽离出来之后，再通过“动态织入”的方式掺入业务逻辑模块中。
+这样做的好处首先是可以保持业务逻辑模块的纯净和高内聚性，其次是可以很方便地复用日志统计等功能模块。
+
+在Java语言中，可以通过反射和动态代理机制来实现AOP技术。  
+而在JavaScript这种动态语言中，AOP的实现更加简单，这是JavaScript与生俱来的能力。  
+通常，在JavaScript中实现AOP，都是指把一个函数“动态织入”到另外一个函数之中，具体的实现技术有很多，本节我们通过扩展Function.prototype来做到这一点。代码如下：
+# `看不太懂 啊啊啊`
 ```javascript
-var isString = function( obj ){
-    return Object.prototype.toString.call( obj) === '[object String]';
-};
-var isArray = function( obj ){
-    return Object.prototype.toString.call( obj) === '[object Array]';
-};
-var isNumber = function( obj ){
-    return Object.prototype.toString.call( obj) ==='[object Number]';
-};
-```
-三个函数有相同（不变）的地方。可以用一个函数返回这三个函数
-```javascript
-var isType = function( type ){
-    return function( obj ){
-        return Object.prototype.toString.call(obj ) === '[object '+ type +']';
+function myLog(w) {
+    console.log("myLog:" + w);
+}
+Function.prototype.before = function (beforefn) {
+    var __self = this; // 保存原函数的引用
+    return function () { // 返回包含了原函数和新函数的"代理"函数
+        beforefn.apply(this, arguments);// 执行新函数，修正this
+        return __self.apply(this, arguments); // 执行原函数
+
     }
 };
-var isString = isType( 'String' );
-var isArray = isType( 'Array' );
-var isNumber = isType( 'Number' );
-console.log( isArray( [ 1, 2, 3 ] ) ); //输出：true
-
-```
-再用一个循环，批量注册
-```javascript
-var Type = {};
-for ( var i = 0, type; type = [ 'String','Array', 'Number' ][ i++ ]; ){
-    (function( type ){
-        Type[ 'is' + type ] = function( obj ){
-            return Object.prototype.toString.call( obj ) ==='[object '+ type +']';
-        }
-    })( type )
+Function.prototype.after = function (afterfn) {
+    var __self = this;
+    return function () {
+        var ret = __self.apply(this, arguments);
+        afterfn.apply(this, arguments);
+        return ret;
+    }
 };
-Type.isArray( [] ); // 输出：true
-Type.isString( "str" ); // 输出：true
-```
-2. getSingle
+var func = function () {
+    console.log("running");
+};
 
+func = func.before(function () {
+    myLog("before function")
+}).after(function () {
+    myLog("after function")
+});
+
+func();
+```
+我们把负责打印数字1和打印数字3的两个函数通过AOP的方式动态植入func函数。通过执行上面的代码，我们看到控制台顺利地返回了执行结果1、2、3。
+这种使用AOP的方式来给函数添加职责，也是JavaScript语言中一种非常特别和巧妙的装饰者模式实现。这种装饰者模式在实际开发中非常有用
+
+#### 3.2.4 高阶函数的其他应用
+```javascript
+
+```
