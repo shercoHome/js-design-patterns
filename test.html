@@ -1,9 +1,10 @@
-<html>
-
+<!DOCTYPE HTML>
+<html lang="zh-CN">
 <head>
-
     <title>关于arguments、call、apply</title>
-
+    <meta charset="utf-8">
+    <meta name="description" content="用面向对象的方式来编写一段命令模式">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
 
@@ -276,6 +277,16 @@
     Type.isString("str"); // 输出：true
 
     console.log('------------------------------------');
+
+var report = (function(){
+    var imgs = [];
+    return function( src ){
+        var img = new Image();
+        imgs.push( img );
+        img.src = src+"?"+Math.random();
+    }
+})();
+report( 'https://ss1.baidu.com/6ONXsjip0QIZ8tyhnq/it/u=2874596575,4117721376&fm=58&w=258&h=258&img.GIF' );
 
 </script>
 
