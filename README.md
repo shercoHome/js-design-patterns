@@ -195,8 +195,11 @@ function Person(name) {
         //[],空数组，只是为了调用shift方法, 可以是任意数组，如[666,777,888]
         //其实相当于 Constructor = arguments[0]，区别在于，使用shift后，原对象arguments改变了
         var Constructor = [].shift.call(arguments); // 取得外部传入的构造器，此例是Person
+
         obj.__proto__ = Constructor.prototype;
-        // 指向正确的原型
+        // 指向正确的原型 通过这句代码，我们让obj.__proto__ 指向Person.prototype，而不是原来的Object.prototype。
+        //__proto__就是对象跟“对象构造器的原型”联系起来的纽带
+
         //apply() 方法有两个参数，用作 this 的对象和要传递给函数的参数的数组
         //arguments 是被shift改变后的参数，去除了Person，只剩下参数
         var ret = Constructor.apply(obj, arguments); // 借用外部传入的构造器给obj设置属 性
@@ -210,5 +213,51 @@ function Person(name) {
     var a = new A( 'sven' );
 
 ```
-3. __对象会记住它的原型。__
-4. __如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。__
+3. __对象会记住它的原型。__  
+
+“对象的原型”，就JavaScript的真正实现来说，其实并不能说对象有原型，而只能说对象的构造器有原型。
+
+JavaScript给对象提供了一个名为__proto__的隐藏属性，某个对象的__proto__属性默认会指向它的构造器的原型对象
+
+```javascript
+var a = new Object();
+console.log ( a.__proto__=== Object.prototype); // 输出：true
+```
+实际上，__proto__就是对象跟“对象构造器的原型”联系起来的纽带。正因为对象要通过__proto__属性来记住它的构造器的原型，所以我们用上一节的objectFactory函数来模拟用new创建对象时， 需要手动给obj对象设置正确的__proto__指向。
+
+4. __如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。__  
+
+“对象把请求委托给它自己的原型”这句话，更好的说法是对象把请求委托给它的构造器的原型。
+
+`这条规则即是原型继承的精髓所在。`
+
+在JavaScript中，每个对象都是从Object.prototype对象克隆而来的，如果是这样的话，我们只能得到单一的继承关系，即每个对象都继承自Object.prototype对象，这样的对象系统显然是非常受限的。  
+实际上，虽然JavaScript的对象最初都是由Object.prototype对象克隆而来的，但对象构造器的原型并不仅限于Object.prototype上，而是可以动态指向其他对象。  
+这样一来，**当对象a需要借用对象b的能力时，可以有选择性地把对象a的构造器的原型指向对象b，从而达到继承的效果。**下面的代码是我们最常用的原型继承方式：
+```javascript
+var obj = { name: 'sven' };
+var A = function(){};
+A.prototype = obj;
+var a = new A();
+console.log( a.name ); // 输出：sven
+```
+浏览器引擎工作步骤
+* 首先，尝试遍历对象a中的所有属性，但没有找到name这个属性。
+* 查找name属性的这个请求被委托给对象a的构造器的原型，它被a.__proto__ 记录着并且指向A.prototype，而A.prototype被设置为对象obj。
+* 在对象obj中找到了name属性，并返回它的值。
+```javascript
+var A = function(){};
+A.prototype = { name: 'sven' };
+var B = function(){};
+B.prototype = new A();
+var b = new B();
+console.log( b.name ); // 输出：sven
+```
+浏览器引擎工作步骤
+* 首先，尝试遍历对象b中的所有属性，但没有找到name这个属性。
+* 查找name属性的请求被委托给对象b的构造器的原型，它被b.__proto__ 记录着并且指向B.prototype，而B.prototype被设置为一个通过new A()创建出来的对象。
+* 在该对象中依然没有找到name属性，于是请求被继续委托给这个对象构造器的原型A.prototype。
+* 在A.prototype中找到了name属性，并返回它的值。
+
+`给A.prototype的构造器原型Object.prototype，Object.prototype的原型是null，`
+
