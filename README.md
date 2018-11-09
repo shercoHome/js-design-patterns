@@ -499,19 +499,17 @@ f返回了一个匿名函数的引用，它可以访问到func()被调用时产�
 
 既然局部变量所在的环境还能被外界访问，这个局部变量就有了不被销毁的理由。在这里产生了一个闭包结构，局部变量的生命看起来被延续了。
 ```javascript
-var Type = {};
-for (var i = 0, type; type = ['String','Array', 'Number'][i++];) {
+//批量注册点击事件，用闭包保存每一个i
+var nodes =document.getElementsByTagName( 'div' );
+for ( var i = 0, len = nodes.length; i< len; i++ ){
 
-    (function (type) {
-        
-        Type['is' + type] = function (obj) {
-            return Object.prototype.toString.call(obj) ==='[object ' + type + ']';
+    (function( i ){
+        nodes[ i ].onclick = function(){
+            console.log(i);
         }
+    })( i )
 
-    })(type)
 };
-Type.isArray([]); // 输出：true
-Type.isString("str"); // 输出：true
 ```
 #### 3.1.3 闭包的更多作用
 1. 封装变量  
@@ -752,5 +750,54 @@ JavaScript语言中的函数显然满足高阶函数的条件，在实际开发�
 2. Array.prototype.sort
     Array.prototype.sort接受一个函数当作参数，这个函数里面封装了数组元素的排序规则。
     * 不变的部分：目的是对数组进行排序；
-    * 可变的部分：使用什么规则去排序。
+    * 可变的部分：使用什么规则去排序。  
+    把可变的部分封装在函数参数里，动态传入Array.prototype.sort，使Array.prototype.sort方法成为了一个非常灵活的方法，
+    ```javascript
+    //从小到大排列
+    [ 1, 4, 3 ].sort( function( a, b ){
+        return a - b;
+    });
+    // 输出: [ 1, 3, 4 ]
+    ```
 #### 3.2.2 函数可以作为返回值输出
+函数当作返回值输出的应用场景也许更多，也更能体现函数式编程的巧妙。让函数继续返回一个可执行的函数，意味着运算过程是可延续的。
+1. 判断数据的类型
+```javascript
+var isString = function( obj ){
+    return Object.prototype.toString.call( obj) === '[object String]';
+};
+var isArray = function( obj ){
+    return Object.prototype.toString.call( obj) === '[object Array]';
+};
+var isNumber = function( obj ){
+    return Object.prototype.toString.call( obj) ==='[object Number]';
+};
+```
+三个函数有相同（不变）的地方。可以用一个函数返回这三个函数
+```javascript
+var isType = function( type ){
+    return function( obj ){
+        return Object.prototype.toString.call(obj ) === '[object '+ type +']';
+    }
+};
+var isString = isType( 'String' );
+var isArray = isType( 'Array' );
+var isNumber = isType( 'Number' );
+console.log( isArray( [ 1, 2, 3 ] ) ); //输出：true
+
+```
+再用一个循环，批量注册
+```javascript
+var Type = {};
+for ( var i = 0, type; type = [ 'String','Array', 'Number' ][ i++ ]; ){
+    (function( type ){
+        Type[ 'is' + type ] = function( obj ){
+            return Object.prototype.toString.call( obj ) ==='[object '+ type +']';
+        }
+    })( type )
+};
+Type.isArray( [] ); // 输出：true
+Type.isString( "str" ); // 输出：true
+```
+2. getSingle
+
