@@ -86,9 +86,8 @@
 不仅包括封装数据和封装实现，还包括封装类型和封装变化。
 
 #### 封装数据
-    们只能依赖变量的作用域来实现封装特性，而且只能模拟出public和private这两种封装性。
-
-    通过函数来创建作用域(ECMAScript 6中提供let)
+我们只能依赖变量的作用域来实现封装特性，而且只能模拟出public和private这两种封装性。  
+通过函数来创建作用域(ECMAScript 6中提供let)  
 
     ```javascript
     var myObject = (function(){
@@ -107,7 +106,7 @@
 
     ```
 #### 封装实现
-    例：each函数，它的作用就是遍历一个聚合对象，使用这个each函数的人不用关心它的内部是怎样实现的，只要它提供的功能正确便可以。即使each函数修改了内部源代码，只要对外的接口或者调用方式没有变化，用户就不用关心它内部实现的改变。
+例：each函数，它的作用就是遍历一个聚合对象，使用这个each函数的人不用关心它的内部是怎样实现的，只要它提供的功能正确便可以。即使each函数修改了内部源代码，只要对外的接口或者调用方式没有变化，用户就不用关心它内部实现的改变。
 
 #### 封装类型
     是静态类型语言中一种重要的封装方式，JavaScript由于动态类型、模糊类型的特性，没有能力，也没有必要做
@@ -121,6 +120,7 @@
 
 ### 1.4 原型模式和基于原型继承的JavaScript对象系统
 ####  1.4.1使用克隆的原型模式
+
     ```javascript
     var clonePlane = Object.create( plane );
     //在不支持Object.create方法的浏览器中，则可以使用以下代码：
@@ -291,69 +291,69 @@
 
     除去不常用的with和eval的情况，具体到实际应用中，this的指向大致可以分为以下4种。
     
-    * 作为对象的方法调用。指向该对象
-        ``` javascript
-        var obj = {
-            a: 1,
-            getA: function(){
-                console.log ( this === obj ); // 输出：true
-                console.log ( this.a ); // 输出: 1
-            }
-        };
-        obj.getA();
-
-        ```
-    * 作为普通函数调用。相当于是window的方法,指向window对象
-        ``` javascript
-        window.name = 'globalName';
-        var myObject = {
-            name: 'sven',
-            getName: function(){
-                console.log(  this.name ); 
-            }
-        };
-        myObject.getName();//sven
-
-        var getName = myObject.getName;
-        getName();//globalName
-        //相当于 window.getName=myObject.getName;
-        //相当于 window.getName();
-        ```
-    * 构造器调用。
-        * 当用new运算符调用函数时，该函数总会返回一个对象，通常情况下，构造器里的this就指向返回的这个对象
-        ``` javascript
-        //构造器的外表跟普通函数一模一样，它们的区别在于被调用的方式
-        function MyClassHello(){
-            this.name2 = 'Hello';
-        };
-        var obj = new MyClassHello();
-        console.log ( MyClassHello.name ); // 输出：MyClassHello
-        console.log ( MyClassHello.name2 ); // 输出：undefined
-        console.log ( obj.name ); // 输出：undefined
-        console.log ( obj.name2 ); // 输出：Hello
-        ```
-        * 如果构造器显式地返回了一个object类型的对象，那么此次运算结果最终会返回这个对象
-        ``` javascript
-        var MyClass = function(){
-        this.name = 'sven';
-        return { // 显式地返回一个对象
-        name: 'anne'
+* 作为对象的方法调用。指向该对象
+    ``` javascript
+    var obj = {
+        a: 1,
+        getA: function(){
+            console.log ( this === obj ); // 输出：true
+            console.log ( this.a ); // 输出: 1
         }
-        };
-        var obj = new MyClass();
-        alert ( obj.name ); // 输出：anne
-        ```
-    * Function.prototype.call或Function.prototype.apply调用，动态地改变传入函数的this：。
-        ```javascript
-        var obj1 = {
-            name: 'sven',
-            getName: function(){
-            return this.name;
-            }
-        };
-        var obj2 = {
-            name: 'anne'
-        };
-        console.log( obj1.getName() ); // 输出:sven
-        console.log( obj1.getName.call( obj2 ) );// 输出：anne
-        ```
+    };
+    obj.getA();
+
+    ```
+* 作为普通函数调用。相当于是window的方法,指向window对象
+    ``` javascript
+    window.name = 'globalName';
+    var myObject = {
+        name: 'sven',
+        getName: function(){
+            console.log(  this.name ); 
+        }
+    };
+    myObject.getName();//sven
+
+    var getName = myObject.getName;
+    getName();//globalName
+    //相当于 window.getName=myObject.getName;
+    //相当于 window.getName();
+    ```
+* 构造器调用。
+    * 当用new运算符调用函数时，该函数总会返回一个对象，通常情况下，构造器里的this就指向返回的这个对象
+    ``` javascript
+    //构造器的外表跟普通函数一模一样，它们的区别在于被调用的方式
+    function MyClassHello(){
+        this.name2 = 'Hello';
+    };
+    var obj = new MyClassHello();
+    console.log ( MyClassHello.name ); // 输出：MyClassHello
+    console.log ( MyClassHello.name2 ); // 输出：undefined
+    console.log ( obj.name ); // 输出：undefined
+    console.log ( obj.name2 ); // 输出：Hello
+    ```
+    * 如果构造器显式地返回了一个object类型的对象，那么此次运算结果最终会返回这个对象
+    ``` javascript
+    var MyClass = function(){
+    this.name = 'sven';
+    return { // 显式地返回一个对象
+    name: 'anne'
+    }
+    };
+    var obj = new MyClass();
+    alert ( obj.name ); // 输出：anne
+    ```
+* Function.prototype.call或Function.prototype.apply调用，动态地改变传入函数的this：。
+    ```javascript
+    var obj1 = {
+        name: 'sven',
+         getName: function(){
+           return this.name;
+        }
+    };
+     var obj2 = {
+        name: 'anne'
+    };
+    console.log( obj1.getName() ); // 输出:sven
+    console.log( obj1.getName.call( obj2 ) );// 输出：anne
+    ```
