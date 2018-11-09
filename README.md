@@ -1,9 +1,9 @@
 # js 设计模式
 
-## 面向对象的JavaScript
+## 一、面向对象的JavaScript
 
 
-### js是动态类型语言 & 鸭子类型（只要function/action对）
+### 1.1 js是动态类型语言 & 鸭子类型（只要function/action对）
 
 ```javascript
 //会嘎嘎叫，就可以加入合唱团，不管是什么类型
@@ -29,7 +29,7 @@ var joinChoir = function( animal ){
 joinChoir( duck ); // 恭喜加入合唱团
 joinChoir( chicken ); // 恭喜加入合唱团
 ```
-### 多态
+### 1.2 多态
 
 “多态”一词源于希腊文polymorphism，拆开来看是poly（复数）+ morph（形态）+ ism，从字面上我们可以理解为复数形态。
 
@@ -81,7 +81,7 @@ makeSound( new Duck() ); // 嘎嘎嘎
 makeSound( new Chicken() ); // 咯咯咯
 ```
 
-### 封装
+### 1.3 封装
 封装的目的是将信息隐藏。
 不仅包括封装数据和封装实现，还包括封装类型和封装变化。
 
@@ -119,8 +119,8 @@ console.log( myObject.__name ) // 输出：undefined
 
     `主要目的是提高可复用性`
 
-### 原型模式和基于原型继承的JavaScript对象系统
-####  使用克隆的原型模式
+### 1.4 原型模式和基于原型继承的JavaScript对象系统
+####  1.4.1使用克隆的原型模式
 ```javascript
 var clonePlane = Object.create( plane );
 //在不支持Object.create方法的浏览器中，则可以使用以下代码：
@@ -130,7 +130,7 @@ Object.create = Object.create || function( obj){
     return new F();
 }
 ```
-#### 克隆是创建对象的手段
+#### 1.4.2克隆是创建对象的手段
 原型模式提供了另外一种创建对象的方式，通过
 克隆对象，我们就不用再关心对象的具体类型名
 字。这就像一个仙女要送给三岁小女孩生日礼
@@ -144,8 +144,8 @@ JavaScript本身是一门基于原型的面向对象语言，
 它的对象系统就是使用原型模式来搭建的，在这
 里称之为原型编程范型也许更合适。
 
-#### 原型编程范型的一些规则
-1. __所有的数据都是对象。__  
+#### 1.4.3原型编程范型的一些规则
+    1. __所有的数据都是对象。__  
 JavaScript在设计的时候，模仿Java引入了两套类型机制：基本类型和对象类型。  
 基本类型包括undefined、number、boolean、string、function  
     `JavaScript中的根对象是Object.prototype对象`  
@@ -154,7 +154,7 @@ JavaScript在设计的时候，模仿Java引入了两套类型机制：基本类
 console.log( Object.getPrototypeOf( obj1 ) ===Object.prototype ); // 输出：true
 console.log( Object.getPrototypeOf( obj2 ) ===Object.prototype ); // 输出：true
 ```
-2. __要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。__  
+    2. __要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。__  
 是显式地调用var obj1 = new Object()或者var obj2 = {}。
 此时，引擎内部会从Object.prototype上面克隆一个对象出来，
 我们最终得到的就是这个对象。  
@@ -213,7 +213,7 @@ function Person(name) {
     var a = new A( 'sven' );
 
 ```
-3. __对象会记住它的原型。__  
+    3. __对象会记住它的原型。__  
 
 “对象的原型”，就JavaScript的真正实现来说，其实并不能说对象有原型，而只能说对象的构造器有原型。
 
@@ -225,7 +225,7 @@ console.log ( a.__proto__=== Object.prototype); // 输出：true
 ```
 实际上，__proto__就是对象跟“对象构造器的原型”联系起来的纽带。正因为对象要通过__proto__属性来记住它的构造器的原型，所以我们用上一节的objectFactory函数来模拟用new创建对象时， 需要手动给obj对象设置正确的__proto__指向。
 
-4. __如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。__  
+    4. __如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。__  
 
 “对象把请求委托给它自己的原型”这句话，更好的说法是对象把请求委托给它的构造器的原型。
 
