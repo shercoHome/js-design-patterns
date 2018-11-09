@@ -145,7 +145,7 @@ JavaScript本身是一门基于原型的面向对象语言，
 里称之为原型编程范型也许更合适。
 
 #### 原型编程范型的一些规则
-* __所有的数据都是对象。__  
+1. __所有的数据都是对象。__  
 JavaScript在设计的时候，模仿Java引入了两套类型机制：基本类型和对象类型。  
 基本类型包括undefined、number、boolean、string、function  
     `JavaScript中的根对象是Object.prototype对象`  
@@ -154,6 +154,63 @@ JavaScript在设计的时候，模仿Java引入了两套类型机制：基本类
 console.log( Object.getPrototypeOf( obj1 ) ===Object.prototype ); // 输出：true
 console.log( Object.getPrototypeOf( obj2 ) ===Object.prototype ); // 输出：true
 ```
-* __要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。__
-* __对象会记住它的原型。__
-* __如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。__
+2. __要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。__  
+是显式地调用var obj1 = new Object()或者var obj2 = {}。
+此时，引擎内部会从Object.prototype上面克隆一个对象出来，
+我们最终得到的就是这个对象。  
+例：  
+```javascript
+function Person( name ){
+    this.name = name;
+};
+Person.prototype.getName = function(){
+    return this.name;
+};
+var a = new Person( 'sven' )
+console.log( a.name ); // 输出：sven
+console.log( a.getName() ); // 输出：sven
+console.log( Object.getPrototypeOf( a ) ===Person.prototype ); // 输出：true
+```
+`在JavaScript中没有类的概念，这句话我们已经重
+复过很多次了。但刚才不是明明调用了new
+Person()吗？`  
+在这里Person并不是类，而是函数构造器，
+JavaScript的函数既可以作为普通函数被调用，也
+可以作为构造器被调用。**当使用new运算符来调
+用函数时，此时的函数就是一个构造器。** 用new 运算符来创建对象的过程，实际上也只是先克隆
+Object.prototype对象，再进行一些其他额
+外操作的过程。
+js 的new，过程如下：
+```javascript
+function Person(name) {
+        this.name = name;
+    };
+    Person.prototype.getName = function () {
+        return this.name;
+    };
+    var objectFactory = function () {
+        var obj = new Object(); // 从 Object.prototype上克隆一个空的对象
+        //shift  返回数组原来的第一个元素的值。
+        //call() 它的第一个参数用作 this 的对象。其他参数都直接传递给函数自身
+        //原本是对[]进行shift操作，由于call存在，shift的操作对象this指向了 arguments
+        //arguments.shift(), 直接操作报错，因为arguments不是一个真正的数组
+        //[],空数组，只是为了调用shift方法, 可以是任意数组，如[666,777,888]
+        //其实相当于 Constructor = arguments[0]，区别在于，使用shift后，原对象arguments改变了
+        var Constructor = [].shift.call(arguments); // 取得外部传入的构造器，此例是Person
+        obj.__proto__ = Constructor.prototype;
+        // 指向正确的原型
+        //apply() 方法有两个参数，用作 this 的对象和要传递给函数的参数的数组
+        //arguments 是被shift改变后的参数，去除了Person，只剩下参数
+        var ret = Constructor.apply(obj, arguments); // 借用外部传入的构造器给obj设置属 性
+        return typeof ret === 'object' ? ret : obj; // 确保构造器总是会返回一个对象
+    };
+    var a = objectFactory(Person, 'sven');
+    console.log(Object.getPrototypeOf(a) === Person.prototype); // 输出：true
+
+    //此时，以下两行代码的效果是一致的
+    var a = objectFactory( A, 'sven' );
+    var a = new A( 'sven' );
+
+```
+3. __对象会记住它的原型。__
+4. __如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。__
