@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+<head>
+    <title>单例模式的例子</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+</head>
+
+<body>
+
+    <p>下面是一个单例模式的例子，在第三部分设计模
+        式的学习中，我们将进行更深入的讲解，这里暂
+        且只了解其代码实现：</p>
+    <pre>
+        var getSingle = function ( fn ) {
+        var ret;
+        return function () {
+        return ret || ( ret = fn.apply( this,
+        arguments ) );
+        };
+        };
+        </pre>
+    <p>这个高阶函数的例子，既把函数当作参数传递，
+        又让函数执行后返回了另外一个函数。我们可以
+        看看getSingle函数的效果：</p>
+    <pre>
+        var getScript = getSingle(function(){
+        return document.createElement( 'script' );
+        });
+        var script1 = getScript();
+        var script2 = getScript();
+        alert ( script1 === script2 ); // 输出：true
+    </pre>
+    <script>
+        var getSingle = function (fn) {
+            var ret;
+            return function () {
+                return ret || (ret = fn.apply(this,arguments));
+            };
+        };
+        var getScript = getSingle(function () {
+            return document.createElement('script');
+        });
+        var script1 = getScript();
+        var script2 = getScript();
+        console.log(script1 === script2); // 输出：true    
+        //////////////////////////////////
+        var getScript2 = function () {
+            return document.createElement('script');
+        };
+        var script11 = getScript2();
+        var script22 = getScript2();
+        console.log(script11 === script22); // 输出：false 
+
+
+    </script>
+</body>
+
+</html>
