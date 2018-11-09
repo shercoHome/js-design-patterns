@@ -356,14 +356,232 @@ console.log(dog.getName() + ' says ' +dog.speak());
 * Function.prototype.call或Function.prototype.apply调用，动态地改变传入函数的this：。
     ```javascript
     var obj1 = {
-        name: 'sven',
+        objName: 'obj1sven',
          getName: function(){
-           return this.name;
+           return this.objName;
         }
     };
      var obj2 = {
-        name: 'anne'
+        objName: 'obj2anne'
     };
-    console.log( obj1.getName() ); // 输出:sven
-    console.log( obj1.getName.call( obj2 ) );// 输出：anne
+    console.log( obj1.getName() ); // 输出:obj1sven
+    console.log( obj1.getName.call( obj2 ) );// 输出：obj2anne
+
+    var lostThis=obj1.getName;
+    console.log( lostThis() ); // 输出:undefined  this指向调用函数的winodw（下文的丢失this现象）
     ```
+#### 2.1.2 丢失的this
+上文的代码的提到此现象，还比如：
+```javascript
+var getId = function( id ){
+return document.getElementById( id );
+};
+getId( 'div1' );//正确
+//////////////////////////////////
+var getId = document.getElementById;
+getId( 'div1' ); //报错
+
+//这是因为许多引擎的document.getElementById方法的内部实现中需要用到this。这个this本来被期望指向document，
+```
+修正this
+
+```javascript
+    document.getElementById = (function (func) {
+        return function () {
+            return func.apply(document, arguments);
+        }
+    })(document.getElementById);
+    //以上的 普通写法是
+    // var func=document.getElementById;//先保存原来的，防止回调循环
+    // document.getElementById = function () {
+    //     return func.apply(document, arguments);
+    // };
+    var getId = document.getElementById;
+    var div = getId('div1');
+    console.log(div.id); // 输出： div1
+```
+### 2.2 call和apply
+Function.prototype.call和Function.prototype.apply都是非常常用的方法。它们的作用一模一样，区别仅在于传入参数形式的不同。
+
+当使用call或者apply的时候，如果我们传入的第一个参数为null，函数体内的this会指向默认的宿主对象，在浏览器中则是window。  
+（是在严格模式下，函数体内的this还是为null）
+```javascript
+Math.max.apply( null, [ 1, 2, 5, 3, 4 ] )// 输出：5
+```
+1. 改变this指向
+
+```javascript
+
+document.getElementById( 'div1' ).onclick =function(){
+    var func = function(){
+        alert ( this.id ); // 输出：div1
+    }
+    func.call( this );
+};
+
+```
+2.  Function.prototype.bind （返回对应函数，便于稍后调用）
+模拟实现：
+```javascript
+Function.prototype.bind = function(){
+    var self = this, // 保存原函数
+    context = [].shift.call( arguments ),// 需要绑定的this上下文
+    args = [].slice.call( arguments );// 剩余的参数转成数组
+    return function(){ // 返回一个新的函数
+        return self.apply( 
+            context,
+            [].concat.call( args, [].slice.call( arguments) ) 
+        );
+        // 执行新的函数的时候，会把之前传入的context当作新函数体内的this
+        // 并且组合两次分别传入的参数，作为新函数的参数
+    }
+};
+
+var obj = {
+    name: 'sven'
+};
+var func = function(){
+        alert ( this.name ); // 输出：sven
+    }.bind( obj);
+func();
+```
+3. 借用其他对象的方法
+    1. 是“借用构造函数”，通过这种技术，可以实现一些类似继承的效果 
+    ```javascript
+    var A = function( name ){
+    this.name = name;
+    };
+    var B = function(){
+    A.apply( this, arguments );  //类似继承
+    };
+    B.prototype.getName = function(){
+    return this.name;
+    };
+    var b = new B( 'sven' );
+    console.log( b.getName() ); // 输出： 'sven'
+    ```
+    2. 类数组对象arguments借用Array.prototype对象上的方法
+    ```javascript
+    (function(){
+        Array.prototype.push.call( arguments, 3 );
+        console.log ( arguments ); // 输出[1,2,3]
+    })( 1, 2 );
+    ```
+## 三、闭包和高阶函数
+### 3.1 闭包
+闭包（closure）的形成与变量的作用域以及变量的生存周期密切相关。
+#### 3.1.1 变量的作用域
+是用var关键字在函数中声明变量，这时候的变量即是局部变量
+#### 3.1.2 变量的生存周期
+```javascript
+var func = function(){
+    var a = 1; // 退出函数后局部变量a将被销毁
+    alert ( a );
+};
+func();
+func();
+```
+```javascript
+var func = function(){
+    var a = 1;
+    return function(){
+        a++;
+        alert ( a );
+    }
+};
+var f = func();
+f(); // 输出：2
+f(); // 输出：3
+f(); // 输出：4
+f(); // 输出：5
+```
+f返回了一个匿名函数的引用，它可以访问到func()被调用时产生的环境，而局部变量a一直处在这个环境里。
+
+既然局部变量所在的环境还能被外界访问，这个局部变量就有了不被销毁的理由。在这里产生了一个闭包结构，局部变量的生命看起来被延续了。
+```javascript
+var Type = {};
+for (var i = 0, type; type = ['String','Array', 'Number'][i++];) {
+
+    (function (type) {
+        
+        Type['is' + type] = function (obj) {
+            return Object.prototype.toString.call(obj) ==='[object ' + type + ']';
+        }
+
+    })(type)
+};
+Type.isArray([]); // 输出：true
+Type.isString("str"); // 输出：true
+```
+#### 3.1.3 闭包的更多作用
+1. 封装变量  
+计算乘积
+```javascript
+var mult = function(){
+    var a = 1;
+    for ( var i = 0, l = arguments.length; i <l; i++ ){
+        a = a * arguments[i];
+    }
+    return a;
+};
+```
+计算乘积，并缓存结果
+```javascript
+var cache = {};
+var mult = function(){
+    var args = Array.prototype.join.call(arguments, ',' );//join 将数组拼接成字符串，以便缓存
+    if ( cache[ args ] ){ //有缓存结果
+        return cache[ args ];
+    }
+    var a = 1;
+    for ( var i = 0, l = arguments.length; i <l; i++ ){
+        a = a * arguments[i];
+    }
+    return cache[ args ] = a; //缓存结果
+};
+alert ( mult( 1,2,3 ) ); // 输出：6
+alert ( mult( 1,2,3 ) ); // 输出：6
+```
+计算乘积，并缓存结果，将cache缓存封闭进计算函数中，避免被修改
+```javascript
+var mult = (function(){
+    var cache = {};
+    return function(){
+        var args = Array.prototype.join.call(arguments, ',' );
+        if ( args in cache ){
+            return cache[ args ];
+        }
+        var a = 1;
+        for ( var i = 0, l = arguments.length;i < l; i++ ){
+            a = a * arguments[i];
+        }
+        return cache[ args ] = a;
+    }
+})();
+```
+计算乘积，并缓存结果，将cache缓存封闭进计算函数中，避免被修改  
+封闭独立的代码块=>小函数  
+如果这些小函数不需要在程序的其他地方使用，最好是把它们用闭包封闭起来
+```javascript
+var mult = (function(){
+    var cache = {};
+    var calculate = function(){ // 封闭calculate函数
+        var a = 1;
+        for ( var i = 0, l = arguments.length;
+        i < l; i++ ){
+        a = a * arguments[i];
+        }
+        return a;
+    };
+    return function(){
+        var args = Array.prototype.join.call(arguments, ',' );
+        if ( args in cache ){
+            return cache[ args ];
+        }
+        return cache[ args ] =calculate.apply( null, arguments );
+    }
+})();
+
+```
+2. 延续局部变量的寿命
+

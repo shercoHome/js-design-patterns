@@ -11,7 +11,7 @@
 
 <body>
     <h1>模拟new object</h1>
-    <pre >
+    <pre id="div1">
             function Person(name) {
                 this.name = name;
             };
@@ -80,6 +80,13 @@
 
 
     </pre>
+
+
+    <div>1</div>
+    <div>2</div>
+    <div>3</div>
+    <div>4</div>
+    <div>5</div>
 
 </body>
 <script type="text/javascript">
@@ -152,63 +159,124 @@
 
 
 
-class Animal {
-    constructor(name) {
-        this.name = name;
+    class Animal {
+        constructor(name) {
+            this.name = name;
+        }
+        getName() {
+            return this.name;
+        }
     }
-    getName() {
-        return this.name;
+    class Dog extends Animal {
+        constructor(name) {
+            super(name);//super关键字用于访问和调用一个对象的父对象上的函数。
+        }
+        speak() {
+            return "woof";
+        }
     }
-}
-class Dog extends Animal {
-    constructor(name) {
-        super(name);//super关键字用于访问和调用一个对象的父对象上的函数。
+    var dog = new Dog("Scamp");
+    console.log(dog.getName() + ' says ' + dog.speak());
+
+
+    window.name = 'globalName';
+    var myObject = {
+        name: 'sven',
+        getName: function () {
+            console.log(this.name);
+        }
+    };
+    myObject.getName();//sven
+    var getName = myObject.getName;
+    getName();//globalName
+
+    console.log('------------------------------------');
+    window.name1 = 'MyClassGlobalName';
+    var MyClass777 = function () {
+        console.log("MyClass Fun : this.name = " + this.name1);
+
+        console.log(this === window);
+        this.name1 = 'MyClassSven';
+
+    };
+    MyClass777();
+
+    var a = {
+        MyClass777: MyClass777,
+        name1: "6666666"
     }
-    speak() {
-        return "woof";
-    }
-}
-var dog = new Dog("Scamp");
-console.log(dog.getName() + ' says ' +dog.speak());
+    a.MyClass777();
 
 
-window.name = 'globalName';
-var myObject = {
-    name: 'sven',
-    getName: function(){
-        console.log(  this.name ); 
-    }
-};
-myObject.getName();//sven
-var getName = myObject.getName;
-getName();//globalName
-
- console.log( '------------------------------------' ); 
-window.name1 = 'MyClassGlobalName';
-var MyClass777 = function(){
-    console.log("MyClass Fun : this.name = "+this.name1);
-
-    console.log(this===window);
-this.name1 = 'MyClassSven';
-
-};
-MyClass777();
-
-var a={
-    MyClass777:MyClass777,
-    name1:"6666666"
-}
-a.MyClass777();
+    //构造器的外表跟普通函数一模一样，它们的区别在于被调用的方式
+    function MyClassHello() {
+        this.name2 = 'Hello';
+    };
+    var obj = new MyClassHello();
+    console.log(MyClassHello.name); // 输出：MyClassHello
+    console.log(MyClassHello.name2); // 输出：undefined
+    console.log(obj.name); // 输出：undefined
+    console.log(obj.name2); // 输出：Hello
 
 
-function MyClassHello(){
-    this.name2 = 'Hello';
-};
-var obj = new MyClassHello();
-console.log ( MyClassHello.name ); // 输出：MyClassHello
-console.log ( MyClassHello.name2 ); // 输出：undefined
-console.log ( obj.name ); // 输出：undefined
-console.log ( obj.name2 ); // 输出：Hello
+    var obj1 = {
+        objName: 'obj1sven',
+        getName: function () {
+            return this.objName;
+        }
+    };
+    var obj2 = {
+        objName: 'obj2anne'
+    };
+    console.log(obj1.getName()); // 输出:obj1sven
+    console.log(obj1.getName.call(obj2));// 输出：obj2anne
+
+    var lostThis = obj1.getName;
+    console.log(lostThis()); // 输出:undefined
+
+
+    console.log('------------------------------------');
+
+    document.getElementById = (function (func) {
+        return function () {
+            return func.apply(document, arguments);
+        }
+    })(document.getElementById);
+    //以上的 普通写法是
+    // var func=document.getElementById;
+    // document.getElementById = function () {
+    //     return func.apply(document, arguments);
+    // };
+    var getId = document.getElementById;
+    var div = getId('div1');
+    console.log(div.id); // 输出： div1
+
+    console.log('----------------闭包--------------------');
+
+    var nodes = document.getElementsByTagName('div');
+    for (var i = 0, len = nodes.length; i < len; i++) {
+        //nodes[i].onclick = function () {    alert(i);   }
+        eval("nodes[" + i + "].onclick = function () {    alert(" + (i + 1) + ");   }");
+    };
+
+
+
+    var Type = {};
+    for (var i = 0, type; type = ['String','Array', 'Number'][i++];) {
+
+       (function (type) {
+            
+            Type['is' + type] = function (obj) {
+                return Object.prototype.toString.call(obj) ==='[object ' + type + ']';
+            }
+
+        })(type)
+    };
+    Type.isArray([]); // 输出：true
+    Type.isString("str"); // 输出：true
+
+    console.log('------------------------------------');
+
 </script>
 
 </html>
