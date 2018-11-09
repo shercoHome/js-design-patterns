@@ -716,4 +716,41 @@ setCommand(createCommand(Tv));
 高阶函数是指至少满足下列条件之一的函数。
 * 函数可以作为参数被传递；
 * 函数可以作为返回值输出。
+
 JavaScript语言中的函数显然满足高阶函数的条件，在实际开发中，无论是将函数当作参数传递，还是让函数的执行结果返回另外一个函数，这两种情形都有很多应用场景，下面就列举一些高阶函数的应用场景。
+
+#### 3.2.1 函数可以作为参数被传递
+1. 回调函数
+    * 如ajax异步请求
+    * 事件委托
+    ```javascript
+    var appendDiv = function(){
+    for ( var i = 0; i < 100; i++ ){
+        var div = document.createElement('div' );
+        div.innerHTML = i;
+        document.body.appendChild( div );
+        div.style.display = 'none'; // 事件不具通用性
+        }
+    };
+    appendDiv();
+    ```
+    因为div.style.display = 'none'，函数难以复用，封装委托成回调
+    ```javascript
+    var appendDiv = function( callback ){
+        for ( var i = 0; i < 100; i++ ){
+            var div = document.createElement('div' );
+            div.innerHTML = i;
+            document.body.appendChild( div );
+            if ( typeof callback === 'function' ){
+                callback( div );
+            }
+        }
+    };
+    appendDiv(function( node ){node.style.display = 'none';});
+
+    ```
+2. Array.prototype.sort
+    Array.prototype.sort接受一个函数当作参数，这个函数里面封装了数组元素的排序规则。
+    * 不变的部分：目的是对数组进行排序；
+    * 可变的部分：使用什么规则去排序。
+#### 3.2.2 函数可以作为返回值输出
