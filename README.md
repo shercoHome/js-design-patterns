@@ -31,11 +31,11 @@
  ```
 ### 1.2 多态
 
-    “多态”一词源于希腊文polymorphism，拆开来看是poly（复数）+ morph（形态）+ ism，从字面上我们可以理解为复数形态。
+“多态”一词源于希腊文polymorphism，拆开来看是poly（复数）+ morph（形态）+ ism，从字面上我们可以理解为复数形态。
 
-    同一操作作用于不同的对象上面，可以产生不同的解释和不同的执行结果。
+同一操作作用于不同的对象上面，可以产生不同的解释和不同的执行结果。
 
-    ```javascript
+```javascript
     var makeSound = function( animal ){
         if ( animal instanceof Duck ){
             console.log( '嘎嘎嘎' );
@@ -48,22 +48,24 @@
     makeSound( new Duck() ); // 嘎嘎嘎
     makeSound( new Chicken() ); // 咯咯咯
 
-    ```
+```
 
 #### 多态之作用
 
-    多态背后的思想是将“做什么”和“谁去做以及怎样去做”分离开来
+多态背后的思想是将“做什么”和“谁去做以及怎样去做”分离开来
 
-    多态最根本的作用就是通过把过程化的条件分支语句转化为对象的多态性，从而消除这些条件分支语句
+多态最根本的作用就是通过把过程化的条件分支语句转化为对象的多态性，从而消除这些条件分支语句
 
 #### 多态之隔离固定
-    ```javascript
+
+```javascript
     var makeSound = function( animal ){
         animal.sound();
     };
-    ```
+```
 #### 多态之封装变化
-    ```javascript
+
+```javascript
     var Duck = function(){}
     Duck.prototype.sound = function(){
     console.log( '嘎嘎嘎' );
@@ -72,16 +74,18 @@
     Chicken.prototype.sound = function(){
     console.log( '咯咯咯' );
     };
-    ```
+```
 #### 多态之外部调用
-    正是由于js的动态类型，不检查创建类型、参数类型
-    animal即可以是duck，也可以是chicken，只要有固定的方法sound，即可调用成功
-    ```javascript
+
+正是由于js的动态类型，不检查创建类型、参数类型
+animal即可以是duck，也可以是chicken，只要有固定的方法sound，即可调用成功
+```javascript
     makeSound( new Duck() ); // 嘎嘎嘎
     makeSound( new Chicken() ); // 咯咯咯
-    ```
+ ```
 
 ### 1.3 封装
+
 封装的目的是将信息隐藏。
 不仅包括封装数据和封装实现，还包括封装类型和封装变化。
 
@@ -89,7 +93,7 @@
 我们只能依赖变量的作用域来实现封装特性，而且只能模拟出public和private这两种封装性。  
 通过函数来创建作用域(ECMAScript 6中提供let)  
 
-    ```javascript
+```javascript
     var myObject = (function(){
 
         var __name = 'sven'; // 私有（private）变量
@@ -104,24 +108,25 @@
     console.log( myObject.getName() ); // 输出：sven
     console.log( myObject.__name ) // 输出：undefined
 
-    ```
+```
 #### 封装实现
 例：each函数，它的作用就是遍历一个聚合对象，使用这个each函数的人不用关心它的内部是怎样实现的，只要它提供的功能正确便可以。即使each函数修改了内部源代码，只要对外的接口或者调用方式没有变化，用户就不用关心它内部实现的改变。
 
 #### 封装类型
-    是静态类型语言中一种重要的封装方式，JavaScript由于动态类型、模糊类型的特性，没有能力，也没有必要做
+是静态类型语言中一种重要的封装方式，JavaScript由于动态类型、模糊类型的特性，没有能力，也没有必要做
+
 #### 封装变化
-    >找到变化并封装之
-    >      ——《设计模式》 
+>找到变化并封装之
+>      ——《设计模式》 
 
-    通过封装变化的方式，把系统中稳定不变的部分和容易变化的部分隔离开来，在系统的演变过程中，我们只需要替换那些容易变化的部分,如果这些部分是已经封装好的，替换起来也相对容易。这可以最大程度地保证程序的稳定性和可扩展性。 
+通过封装变化的方式，把系统中稳定不变的部分和容易变化的部分隔离开来，在系统的演变过程中，我们只需要替换那些容易变化的部分,如果这些部分是已经封装好的，替换起来也相对容易。这可以最大程度地保证程序的稳定性和可扩展性。 
 
-        `主要目的是提高可复用性`
+    `主要目的是提高可复用性`
 
 ### 1.4 原型模式和基于原型继承的JavaScript对象系统
 ####  1.4.1使用克隆的原型模式
 
-    ```javascript
+ ```javascript
     var clonePlane = Object.create( plane );
     //在不支持Object.create方法的浏览器中，则可以使用以下代码：
     Object.create = Object.create || function( obj){
@@ -129,10 +134,10 @@
         F.prototype = obj;
         return new F();
     }
-    ```
+ ```
 #### 1.4.2克隆是创建对象的手段
-    原型模式提供了另外一种创建对象的方式，通过克隆对象，我们就不用再关心对象的具体类型名字。这就像一个仙女要送给三岁小女孩生日礼物，虽然小女孩可能还不知道飞机或者船怎么说，但她可以指着商店橱柜里的飞机模型说“我要这个”。
-    当然在JavaScript这种类型模糊的语言中，创建对象非常容易，也不存在类型耦合的问题。从设计模式的角度来讲，原型模式的意义并不算大 。但JavaScript本身是一门基于原型的面向对象语言，它的对象系统就是使用原型模式来搭建的，在这里称之为原型编程范型也许更合适。
+原型模式提供了另外一种创建对象的方式，通过克隆对象，我们就不用再关心对象的具体类型名字。这就像一个仙女要送给三岁小女孩生日礼物，虽然小女孩可能还不知道飞机或者船怎么说，但她可以指着商店橱柜里的飞机模型说“我要这个”。
+当然在JavaScript这种类型模糊的语言中，创建对象非常容易，也不存在类型耦合的问题。从设计模式的角度来讲，原型模式的意义并不算大 。但JavaScript本身是一门基于原型的面向对象语言，它的对象系统就是使用原型模式来搭建的，在这里称之为原型编程范型也许更合适。
 
 #### 1.4.3 JavaScript中的原型继承（原型编程范型的一些规则）
 
@@ -142,30 +147,34 @@
 * 如果对象无法响应某个请求，它会把这个请求委托给它自己的原型。
 
     1. __所有的数据都是对象。__  
+
     JavaScript在设计的时候，模仿Java引入了两套类型机制：基本类型和对象类型。  
     基本类型包括undefined、number、boolean、string、function  
+
         `JavaScript中的根对象是Object.prototype对象`  
+
     可以利用ECMAScript 5提供的Object.getPrototypeOf来查看这两个对象的原型：  
     ```javascript
     console.log( Object.getPrototypeOf( obj1 ) ===Object.prototype ); // 输出：true
     console.log( Object.getPrototypeOf( obj2 ) ===Object.prototype ); // 输出：true
     ```
     2. __要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。__  
+
     是显式地调用var obj1 = new Object()或者var obj2 = {}。
     此时，引擎内部会从Object.prototype上面克隆一个对象出来，
     我们最终得到的就是这个对象。  
     例：  
     ```javascript
-    function Person( name ){
-        this.name = name;
-    };
-    Person.prototype.getName = function(){
-        return this.name;
-    };
-    var a = new Person( 'sven' )
-    console.log( a.name ); // 输出：sven
-    console.log( a.getName() ); // 输出：sven
-    console.log( Object.getPrototypeOf( a ) ===Person.prototype ); // 输出：true
+        function Person( name ){
+            this.name = name;
+        };
+        Person.prototype.getName = function(){
+            return this.name;
+        };
+        var a = new Person( 'sven' )
+        console.log( a.name ); // 输出：sven
+        console.log( a.getName() ); // 输出：sven
+        console.log( Object.getPrototypeOf( a ) ===Person.prototype ); // 输出：true
     ```
 
     `在JavaScript中没有类的概念，这句话我们已经重
@@ -176,37 +185,37 @@
 
     js 的new，过程如下：
     ```javascript
-    function Person(name) {
-            this.name = name;
-    ;
-    Person.prototype.getName = function () {
-            return this.name;
-    };
-    var objectFactory = function () {
-            var obj = new Object(); // 从 Object.prototype上克隆一个空的对象
-            //shift  返回数组原来的第一个元素的值。
-            //call() 它的第一个参数用作 this 的对象。其他参数都直接传递给函数自身
-            //原本是对[]进行shift操作，由于call存在，shift的操作对象this指向了 arguments
-            //arguments.shift(), 直接操作报错，因为arguments不是一个真正的数组
-            //[],空数组，只是为了调用shift方法, 可以是任意数组，如[666,777,888]
-            //其实相当于 Constructor = arguments[0]，区别在于，使用shift后，原对象arguments改变了
-            var Constructor = [].shift.call(arguments); // 取得外部传入的构造器，此例是Person
+        function Person(name) {
+                this.name = name;
+        ;
+        Person.prototype.getName = function () {
+                return this.name;
+        };
+        var objectFactory = function () {
+                var obj = new Object(); // 从 Object.prototype上克隆一个空的对象
+                //shift  返回数组原来的第一个元素的值。
+                //call() 它的第一个参数用作 this 的对象。其他参数都直接传递给函数自身
+                //原本是对[]进行shift操作，由于call存在，shift的操作对象this指向了 arguments
+                //arguments.shift(), 直接操作报错，因为arguments不是一个真正的数组
+                //[],空数组，只是为了调用shift方法, 可以是任意数组，如[666,777,888]
+                //其实相当于 Constructor = arguments[0]，区别在于，使用shift后，原对象arguments改变了
+                var Constructor = [].shift.call(arguments); // 取得外部传入的构造器，此例是Person
 
-            obj.__proto__ = Constructor.prototype;
-            // 指向正确的原型 通过这句代码，我们让obj.__proto__ 指向Person.prototype，而不是原来的Object.prototype。
-            //__proto__就是对象跟“对象构造器的原型”联系起来的纽带
+                obj.__proto__ = Constructor.prototype;
+                // 指向正确的原型 通过这句代码，我们让obj.__proto__ 指向Person.prototype，而不是原来的Object.prototype。
+                //__proto__就是对象跟“对象构造器的原型”联系起来的纽带
 
-            //apply() 方法有两个参数，用作 this 的对象和要传递给函数的参数的数组
-            //arguments 是被shift改变后的参数，去除了Person，只剩下参数
-            var ret = Constructor.apply(obj, arguments); // 借用外部传入的构造器给obj设置属 性
-            return typeof ret === 'object' ? ret : obj; // 确保构造器总是会返回一个对象
-    };
-    var a = objectFactory(Person, 'sven');
-    console.log(Object.getPrototypeOf(a) === Person.prototype); // 输出：true
+                //apply() 方法有两个参数，用作 this 的对象和要传递给函数的参数的数组
+                //arguments 是被shift改变后的参数，去除了Person，只剩下参数
+                var ret = Constructor.apply(obj, arguments); // 借用外部传入的构造器给obj设置属 性
+                return typeof ret === 'object' ? ret : obj; // 确保构造器总是会返回一个对象
+        };
+        var a = objectFactory(Person, 'sven');
+        console.log(Object.getPrototypeOf(a) === Person.prototype); // 输出：true
 
-    //此时，以下两行代码的效果是一致的
-    var a = objectFactory( A, 'sven' );
-    var a = new A( 'sven' );
+        //此时，以下两行代码的效果是一致的
+        var a = objectFactory( A, 'sven' );
+        var a = new A( 'sven' );
 
     ```
     3. __对象会记住它的原型。__  
@@ -216,8 +225,8 @@
     JavaScript给对象提供了一个名为__proto__的隐藏属性，某个对象的__proto__属性默认会指向它的构造器的原型对象
 
     ```javascript
-    var a = new Object();
-    console.log ( a.__proto__=== Object.prototype); // 输出：true
+        var a = new Object();
+        console.log ( a.__proto__=== Object.prototype); // 输出：true
     ```
     实际上，__proto__就是对象跟“对象构造器的原型”联系起来的纽带。正因为对象要通过__proto__属性来记住它的构造器的原型，所以我们用上一节的objectFactory函数来模拟用new创建对象时， 需要手动给obj对象设置正确的__proto__指向。
 
@@ -231,25 +240,25 @@
     实际上，虽然JavaScript的对象最初都是由Object.prototype对象克隆而来的，但对象构造器的原型并不仅限于Object.prototype上，而是可以动态指向其他对象。  
     这样一来，**当对象a需要借用对象b的能力时，可以有选择性地把对象a的构造器的原型指向对象b，从而达到继承的效果。**下面的代码是我们最常用的原型继承方式：
     ```javascript
-    var obj = { name: 'sven' };
-    var A = function(){};
-    A.prototype = obj;
-    var a = new A();
-    console.log( a.name ); // 输出：sven
+        var obj = { name: 'sven' };
+        var A = function(){};
+        A.prototype = obj;
+        var a = new A();
+        console.log( a.name ); // 输出：sven
     ```
     浏览器引擎工作步骤  
 
-        * 首先，尝试遍历对象a中的所有属性，但没有找到name这个属性。
-        * 查找name属性的这个请求被委托给对象a的构造器的原型，它被a.__proto__ 记录着并且指向A.prototype，而A.prototype被设置为对象obj。
-        * 在对象obj中找到了name属性，并返回它的值。
+    * 首先，尝试遍历对象a中的所有属性，但没有找到name这个属性。
+    * 查找name属性的这个请求被委托给对象a的构造器的原型，它被a.__proto__ 记录着并且指向A.prototype，而A.prototype被设置为对象obj。
+    * 在对象obj中找到了name属性，并返回它的值。
 
     ```javascript
-    var A = function(){};
-    A.prototype = { name: 'sven' };
-    var B = function(){};
-    B.prototype = new A();
-    var b = new B();
-    console.log( b.name ); // 输出：sven
+        var A = function(){};
+        A.prototype = { name: 'sven' };
+        var B = function(){};
+        B.prototype = new A();
+        var b = new B();
+        console.log( b.name ); // 输出：sven
     ```
     浏览器引擎工作步骤
     * 首先，尝试遍历对象b中的所有属性，但没有找到name这个属性。
@@ -260,7 +269,8 @@
     `给A.prototype的构造器原型Object.prototype，Object.prototype的原型是null，`
 
 #### 1.4.4 ECMAScript 6 实现的继承（实际也是通过原型继承）
-    ```javascript
+
+```javascript
     class Animal {
         constructor(name) {
             this.name = name;
@@ -279,7 +289,7 @@
     }
     var dog = new Dog("Scamp");
     console.log(dog.getName() + ' says ' +dog.speak());
-    ```
+```
 
 ## 二、this call 和 apply
 
@@ -289,7 +299,7 @@
 
 #### 2.1.1 this的指向  
 
-    除去不常用的with和eval的情况，具体到实际应用中，this的指向大致可以分为以下4种。
+`除去不常用的with和eval的情况，具体到实际应用中，this的指向大致可以分为以下4种。`
     
 * 作为对象的方法调用。指向该对象
     ``` javascript
