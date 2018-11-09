@@ -171,15 +171,13 @@ console.log( a.name ); // 输出：sven
 console.log( a.getName() ); // 输出：sven
 console.log( Object.getPrototypeOf( a ) ===Person.prototype ); // 输出：true
 ```
+
 `在JavaScript中没有类的概念，这句话我们已经重
 复过很多次了。但刚才不是明明调用了new
 Person()吗？`  
-在这里Person并不是类，而是函数构造器，
-JavaScript的函数既可以作为普通函数被调用，也
-可以作为构造器被调用。**当使用new运算符来调
-用函数时，此时的函数就是一个构造器。** 用new 运算符来创建对象的过程，实际上也只是先克隆
-Object.prototype对象，再进行一些其他额
-外操作的过程。
+
+在这里Person并不是类，而是函数构造器，JavaScript的函数既可以作为普通函数被调用，也可以作为构造器被调用。**当使用new运算符来调用函数时，此时的函数就是一个构造器。** 用new 运算符来创建对象的过程，实际上也只是先克隆Object.prototype对象，再进行一些其他额外操作的过程。
+
 js 的new，过程如下：
 ```javascript
 function Person(name) {
