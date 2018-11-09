@@ -24,8 +24,7 @@
             this.receiver = receiver;
         };
         OpenTvCommand.prototype.execute = function () {
-            this.receiver.open(); // 执行命令，打开电
-            视机
+            this.receiver.open(); // 执行命令，打开电视机
         };
         OpenTvCommand.prototype.undo = function () {
             this.receiver.close(); // 撤销命令，关闭电视机
