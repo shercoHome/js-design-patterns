@@ -5,7 +5,7 @@
 
 ### 1.1 js是动态类型语言 & 鸭子类型（只要function/action对）
 
-    ```javascript
+```javascript
     //会嘎嘎叫，就可以加入合唱团，不管是什么类型
     var duck = {
         duckSinging: function(){
@@ -28,7 +28,7 @@
     };
     joinChoir( duck ); // 恭喜加入合唱团
     joinChoir( chicken ); // 恭喜加入合唱团
-    ```
+ ```
 ### 1.2 多态
 
     “多态”一词源于希腊文polymorphism，拆开来看是poly（复数）+ morph（形态）+ ism，从字面上我们可以理解为复数形态。
