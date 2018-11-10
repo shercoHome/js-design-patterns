@@ -953,8 +953,8 @@ func();
         console.log( arguments ); // 输出：[1,2, 3, 4]
     })( 1, 2, 3 );
     ```
-        `方法中用到this的地方就不再局限于原来规定的对象，而是加以泛化并得到更广的适用性。`
-        `把泛化this的过程提取出来，就是uncurrying`
+    `方法中用到this的地方就不再局限于原来规定的对象，而是加以泛化并得到更广的适用性。`
+    `把泛化this的过程提取出来，就是uncurrying`
     ```javascript
     Function.prototype.uncurrying = function () {
         var self = this; //保留一下原生的方法（数组的push/shift foreach）
