@@ -867,6 +867,130 @@ func();
 这种使用AOP的方式来给函数添加职责，也是JavaScript语言中一种非常特别和巧妙的装饰者模式实现。这种装饰者模式在实际开发中非常有用
 
 #### 3.2.4 高阶函数的其他应用
-```javascript
+1. currying
+    currying又称部分求值。一个currying的函数首先会接受一些参数，接受了这些参数之后，该函数并不会立即求值，而是继续返回另外一个函数，刚才传入的参数在函数形成的闭包中被保存起来。待到函数被真正需要求值的时候，之前传入的所有参数都会被一次性用于求值。
+    假设我们要编写一个计算每月开销的函数。在每天结束之前，我们都要记录今天花掉了多少钱。代码如下：
+    ```javascript
+    //通用的functioncurrying(){}，function currying(){}接受一个参数，即将要被currying的函数。
+    var currying = function (fn) {
+        var args = [];
+        console.log(this);//调用currying的是window
+        return function () {
+            console.log(this);//调用fn的是xiaoMing
+            if (arguments.length === 0) {
+                // 当没有参数传入时，计算之前保存的所有参数
+                // switch (args.length) {
+                //     case 0:
+                //         return fn()
+                //         break;
+                //     case 1:
+                //         return fn(args[0])
+                //         break;
+                //     case 2:
+                //         return fn(args[0], args[1])
+                //         break;
+                //     case 3:
+                //         return fn(args[0], args[1], args[2])
+                //         break;
+                //     case 4:
+                //         return fn(args[0], args[1], args[2], args[3])
+                //         break;
+                //      //   ……
+                // }
+                //因为参数是保存在数组里，且不确定是几个参数，所以用apply将整个数组传入
+                return fn.apply(this, args);//修改fn的this指向为xiaoMing，并运行fn（即xiaoMing.cost）
+            } else {
+                //将类数组arguments里的参数传入args保存，用apply调用数组的push方法
+                [].push.apply(args, arguments);
+                //返回本函数
+                return arguments.callee;
+            }
+        }
+    };
+    ```
+    使用例子如下
+    ```javascript
+    var xiaoMing = {
+        name: "小明",
+        cost: (function () {
+            var money = 0;
+            return function () {
+                for (var i = 0, l = arguments.length;
+                    i < l; i++) {
+                    money += arguments[i];
+                }
+                return money;
+            }
+        })()
+    };
 
-```
+    xiaoMing.cost = currying(xiaoMing.cost);// 转化成currying函数
+    xiaoMing.cost(2); // 未真正求值
+    xiaoMing.cost(4); // 未真正求值
+    xiaoMing.cost(6); // 未真正求值
+    console.log(xiaoMing.cost()); // 求值并输出：12
+    ```
+2. uncurrying
+    在JavaScript中，当我们调用对象的某个方法时，其实不用去关心该对象原本是否被设计为拥有这个方法，这是动态类型语言的特点，也是常说的鸭子类型思想。
+    同理，一个对象也未必只能使用它自身的方法，那么有什么办法可以让对象去借用一个原本不属于它的方法呢？
+    答案对于我们来说很简单，call和apply都可以完成这个需求：
+    ```javascript
+    var obj1 = {
+        name: 'sven'
+    };
+    var obj2 = {
+        getName: function(){
+            return this.name;
+        }
+    };
+    console.log( obj2.getName.call( obj1 ) );// 输出：sven
+
+    ```
+    我们常常让类数组对象去借用Array.prototype的方法，这是call和apply最常见的应用场景之一
+    ```javascript
+    (function(){
+        Array.prototype.push.call( arguments, 4 );// arguments借用Array.prototype.push方法
+        console.log( arguments ); // 输出：[1,2, 3, 4]
+    })( 1, 2, 3 );
+    ```
+        `方法中用到this的地方就不再局限于原来规定的对象，而是加以泛化并得到更广的适用性。`
+        `把泛化this的过程提取出来，就是uncurrying`
+    ```javascript
+    Function.prototype.uncurrying = function () {
+        var self = this; //保留一下原生的方法（数组的push/shift foreach）
+        return function () {
+            //获取第一个参数（这应该是一个对象）
+            var obj = Array.prototype.shift.call(arguments);//返回值数组原来的第一个元素的值。
+            return self.apply(obj, arguments);
+        };
+    };
+    ```
+    使用如下：(通过uncurrying的方式，Array.prototype.push.call变成了一个通用的push函数)
+    ```javascript
+    var push = Array.prototype.push.uncurrying();
+    (function(){
+        push( arguments, 4 );
+        console.log( arguments ); // 输出：[1,2, 3, 4]
+    })( 1, 2, 3 );
+    ```
+    一次性地把Array.prototype上的方法“复制”到array对象上
+    ```javascript
+    //赋值语句会返回那个值，当值不存在时返回undefined，转成boolean就是false，跳出循环。
+    for ( var i = 0, fn, ary = [ 'push', 'shift','forEach' ]; fn = ary[ i++ ]; ){
+        Array[fn] = Array.prototype[fn].uncurrying();
+    };
+    var obj = {
+        "length": 3,
+        "0": 1,
+        "1": 2,
+        "2": 3
+    };
+    Array.push( obj, 4 ); // 向对象中添加一个元素
+    console.log( obj.length ); // 输出：4
+    var first = Array.shift( obj ); // 截取第一个元素
+    console.log( first ); // 输出：1
+    console.log( obj ); // 输出：{0: 2, 1: 3, 2:4, length: 3}
+    Array.forEach( obj, function( i, n ){
+    console.log( n ); // 分别输出：0, 1, 2
+    });
+    ```
