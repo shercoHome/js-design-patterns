@@ -954,6 +954,7 @@ func();
     })( 1, 2, 3 );
     ```
     `方法中用到this的地方就不再局限于原来规定的对象，而是加以泛化并得到更广的适用性。`
+    
     `把泛化this的过程提取出来，就是uncurrying`
     ```javascript
     Function.prototype.uncurrying = function () {
