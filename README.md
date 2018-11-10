@@ -968,6 +968,21 @@ func();
         };
     };
     ```
+    uncurrying的另一种实现方式
+    ```javascript
+    Function.prototype.uncurrying = function(){
+        var self = this;
+        return function(){
+            return Function.prototype.call.apply(self, arguments );
+            //0、将参数代进来理解
+            //Function.prototype.call.apply(Array.prototype.push, [obj, 2] );
+            //1、apply替换的执行函数的对象并扁平化了数组内容，
+            //Array.prototype.push.call(obj, 2);
+            //2、call函数将数组内容的第一个参数替换执行函数对象
+            //obj.push(2);
+        }
+    };
+    ```
     使用如下：(通过uncurrying的方式，Array.prototype.push.call变成了一个通用的push函数)
     ```javascript
     var push = Array.prototype.push.uncurrying();
