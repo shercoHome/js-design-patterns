@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+<head>
+    <title>Throttling函数节流</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+</head>
+
+<body>
+
+    <p>函数节流</p>
+    <pre>
+        确保在1000ms内只打印一次
+    </pre>
+    <button id="click">click</button>
+    <div id="add"></div>
+    <script>
+        var n = 0, contr_pr = contr(pr, 1000);
+        document.getElementById("click").onclick = function () {
+            n++;
+            this.innerHTML = "click:" + n
+            contr_pr(n);
+        }
+
+        function pr(q) {
+            var p = document.createElement("p");
+            p.innerHTML = "print:" + q;
+            document.getElementById("add").appendChild(p);
+        }
+
+        function contr(fn, interval) {
+            var t;
+            var isFirst = true;
+            var interval = interval || 500;
+            return function () {
+                if (isFirst) {
+                    fn.apply(this, arguments);
+                    isFirst = false;
+                    t = new Date();
+                } else {
+                    if ((new Date() - t) >= interval) {
+                        fn.apply(this, arguments);
+                        t = new Date();
+                    }
+                }
+            }
+
+        }
+
+
+        var throttle = function (fn, interval) {
+            var __self = fn, // 保存需要被延迟执行的函数引用
+                timer, // 定时器
+                firstTime = true; // 是否是第一次调用
+            return function () {
+                var args = arguments,
+                    __me = this;
+                if (firstTime) { // 如果是第一次调用，不需延迟执行
+                    __self.apply(__me, args);
+                    return firstTime = false;
+                }
+                if (timer) { // 如果定时器还在，说明前一次延迟执行还没有完成
+                    return false;
+                }
+                timer = setTimeout(function () { //延迟一段时间执行
+                    clearTimeout(timer);
+                    timer = null;
+                    __self.apply(__me, args);
+                }, interval || 500);
+            };
+        };
+        window.onresize = throttle(function () {
+            console.log(1);
+        }, 500);
+    </script>
+</body>
+
+</html>
